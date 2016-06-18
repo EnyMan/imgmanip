@@ -5,7 +5,8 @@
 jejížm ukolem bylo rozpůlit obrázek v pulce
 a schovat do něj další obrázek a textový soubor nebo wav soubor"""
 
-import PIL
+from PIL import Image
+import ntpath
 import sys
 import os
 import tkinter as tk
@@ -80,6 +81,7 @@ def checkiffiles(args):
             :param args: files to check
             :returns: string of bad files separated by space
         """
+
     broken = ""
     for file in args:
         if not os.path.exists(file) and not os.access(file, os.R_OK):
@@ -92,15 +94,36 @@ def checkiffiles(args):
 
 
 def usage():
+    """Prints usage to stderr"""
+
     print("IMGMANIP\n"
-          "simple tool that's cuts stereoscopic img in half and \"hides\" additional files in it\n"
+          "Simple tool that's cuts stereoscopic img in half and \"hides\" additional files in it.\n"
           "\n"
           "Usage: imgmanip source file...\n"
-          "           creates new file source.secret where source is the file that is cut in half\n"
+          "           creates new file source.secret.jpg where source is the file that is cut in half\n"
           "           and files are hidden files in it\n"
           "       imgmanip -g\n"
           "           launches imgmanip in gui form\n", file=sys.stderr)
 
+
+def cutimg(img):
+    box = (0, 0, img.width/2, img.height)
+    cropped = img.crop(box)
+    return cropped
+
+
+def mainfunc():
+    """"Main function of the program"""
+
+    source = sys.argv.pop(0)
+    files = sys.argv
+
+    try:
+        im = Image.open(source)
+    except IOError:
+        print("File {0} is not and valid img".format(source), file=sys.stderr)
+    new = cutimg(im)
+    new.save("{0}.secret.jpg".format(ntpath.basename(source)))
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
@@ -118,3 +141,8 @@ if __name__ == '__main__':
         if notfiles != "":
             print("Files {0} are not accessible files!".format(notfiles), file=sys.stderr)
             exit(1)
+        if not os.access(os.getcwd(), os.W_OK):
+            print("Directory {0} not writable!".format(os.getcwd()), file=sys.stderr)
+            exit(1)
+        sys.argv.pop(0)
+        mainfunc()
