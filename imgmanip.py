@@ -112,8 +112,20 @@ def cutimg(img):
     return cropped
 
 
-def mainfunc():
-    """"Main function of the program"""
+def addfiles(img, files):
+    pass
+
+
+def removefiles(img):
+    pass
+
+
+def mainfunc(mode):
+    """"Main function of the program
+
+        :param mode: chooses if hide 'c' or unhide 'd'
+        :type mode: string
+    """
 
     source = sys.argv.pop(0)
     files = sys.argv
@@ -122,20 +134,36 @@ def mainfunc():
         im = Image.open(source)
     except IOError:
         print("File {0} is not and valid img".format(source), file=sys.stderr)
-    new = cutimg(im)
-    new.save("{0}.secret.jpg".format(ntpath.basename(source)))
+    if mode == "c":
+        new = cutimg(im)
+        new.save("{0}.secret.jpg".format(ntpath.basename(source)))
+        addfiles(source, files)
+    elif mode == "d":
+        removefiles(source)
+        pass
+    else:
+        raise SystemError("{0} is not valid mode.".format(mode))
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         print("Not enough argument!", file=sys.stderr)
         usage()
         exit(1)
-    elif len(sys.argv) == 2 and sys.argv[1] == "-g":
-        base = tk.Tk()
-        base.title("IMGMANIP")
-        base.geometry("400x200")
-        TkGui(base).grid()
-        base.mainloop()
+    elif len(sys.argv) == 2:
+        if sys.argv[1] == "-g":
+            base = tk.Tk()
+            base.title("IMGMANIP")
+            base.geometry("400x200")
+            TkGui(base).grid()
+            base.mainloop()
+        else:
+            notfiles = checkiffiles(sys.argv[1:])
+            if notfiles != "":
+                print("Files {0} are not accessible files!".format(notfiles), file=sys.stderr)
+                exit(1)
+            else:
+                sys.argv.pop(0)
+                mainfunc('d')
     else:
         notfiles = checkiffiles(sys.argv[1:])
         if notfiles != "":
@@ -145,4 +173,4 @@ if __name__ == '__main__':
             print("Directory {0} not writable!".format(os.getcwd()), file=sys.stderr)
             exit(1)
         sys.argv.pop(0)
-        mainfunc()
+        mainfunc('c')
