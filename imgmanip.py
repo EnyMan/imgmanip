@@ -7,6 +7,7 @@ a schovat do něj další obrázek a textový soubor nebo wav soubor"""
 
 from PIL import Image
 import ntpath
+import struct
 import sys
 import os
 import tkinter as tk
@@ -113,10 +114,32 @@ def cutimg(img):
 
 
 def addfiles(img, files):
-    pass
-
+    to = open(img, "ab+")
+    ending = to.tell()
+    to.write(b":hidden")
+    for file in files:
+        fh = open(file, "rb")
+        fh.seek(0, 2)
+        size = fh.tell()
+        fh.seek(0)
+        to.write(b":" + bytes(ntpath.basename(file).encode()) + b":")
+        to.write(bytes(str(size).encode()) + b":")
+        to.write(fh.read())
+        fh.close()
+    to.write(b":")
+    to.write(struct.pack("l", ending))
+    to.write(b":31337")
+    to.close()
 
 def removefiles(img):
+    source = open(img, "rb+")
+    source.seek(-6, 2)
+    if source.read(6) != b":31337":
+        print("some error", file=sys.stderr)
+        exit(1)
+    source.seek(-10, 2)
+    start = struct.unpack("l", source.read(4))[0]
+    source.seek(start, 0)
     pass
 
 
@@ -134,13 +157,13 @@ def mainfunc(mode):
         im = Image.open(source)
     except IOError:
         print("File {0} is not and valid img".format(source), file=sys.stderr)
+        exit(1)
     if mode == "c":
         new = cutimg(im)
         new.save("{0}.secret.jpg".format(ntpath.basename(source)))
         addfiles(source, files)
     elif mode == "d":
         removefiles(source)
-        pass
     else:
         raise SystemError("{0} is not valid mode.".format(mode))
 
