@@ -74,6 +74,9 @@ class TkGui(tk.Frame):
         if filename:
             print(filename)
 
+MAGIC_NUMBER = -6
+LENGTH = -10
+
 
 def checkiffiles(args):
     """Return string of files that are not files.
@@ -113,34 +116,58 @@ def cutimg(img):
     return cropped
 
 
+# :hidden:FILES:NAMELENGTH:NAME:FILELENGTH:FILECONTENT:...:STARTPOSS:31337
 def addfiles(img, files):
     to = open(img, "ab+")
     ending = to.tell()
-    to.write(b":hidden")
+    to.write(b":hidden:")
+    to.write(struct.pack("l", len(files)))
+    to.write(b":")
     for file in files:
         fh = open(file, "rb")
         fh.seek(0, 2)
         size = fh.tell()
         fh.seek(0)
+        to.write(struct.pack("l", len(ntpath.basename(file))))
         to.write(b":" + bytes(ntpath.basename(file).encode()) + b":")
-        to.write(bytes(str(size).encode()) + b":")
+        to.write(struct.pack("l", size) + b":")
         to.write(fh.read())
         fh.close()
-    to.write(b":")
+        to.write(b":")
     to.write(struct.pack("l", ending))
     to.write(b":31337")
     to.close()
 
+
+# :hidden:FILES:NAMELENGTH:NAME:FILELENGTH:FILECONTENT:...:STARTPOSS:31337
 def removefiles(img):
     source = open(img, "rb+")
-    source.seek(-6, 2)
+    source.seek(MAGIC_NUMBER, 2)
     if source.read(6) != b":31337":
         print("some error", file=sys.stderr)
         exit(1)
-    source.seek(-10, 2)
+    source.seek(LENGTH, 2)
     start = struct.unpack("l", source.read(4))[0]
     source.seek(start, 0)
-    pass
+    if source.read(8) != b":hidden:":
+        print("some error", file=sys.stderr)
+        exit(1)
+    files = struct.unpack("l", source.read(4))[0]
+    for i in range(files):
+        a = source.read(1)
+        namelenght = struct.unpack("l", source.read(4))[0]
+        a = source.read(1)
+        name = source.read(namelenght)
+        a = source.read(1)
+        filelenght = struct.unpack("l", source.read(4))[0]
+        a = source.read(1)
+        file = source.read(filelenght)
+        tmp = open(name, "wb+")
+        tmp.write(file)
+        tmp.close()
+
+    # delete the added stuff
+    source.truncate(start)
 
 
 def mainfunc(mode):
