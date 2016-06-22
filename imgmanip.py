@@ -18,10 +18,13 @@ import tkinter.font
 
 
 class TkGui(tk.Frame):
-    """"GUI init class"""
+    """"
+    GUI init class
+    """
 
     def __init__(self, root):
-        """"Init method
+        """"
+        Init method
 
             :param root: Tkinter root file
             :type root: Tk
@@ -33,11 +36,30 @@ class TkGui(tk.Frame):
         # options for buttons
         button_opt = {'pady': 0}
 
+        # define labels
+        one = ttk.Entry(self, width=40, style="TEntry")
+        one.insert(0, "Select File")
+        one.grid(row=1, column=1, pady=10, padx=7)
+
+        many = ttk.Entry(self, width=40, style="TEntry")
+        many.insert(0, "Select Files")
+        many.grid(row=2, column=1, pady=0, padx=7)
+
+        one2 = ttk.Entry(self, width=40, style="TEntry")
+        one2.insert(0, "Select File")
+        one2.grid(row=5, column=1, pady=0, padx=7)
+
         # define buttons
-        ttk.Button(self, text='OPEN', width=7, style="TButton", command=self.openbasefilename).grid(row=3, column=1,
-                                                                                                    **button_opt)
-        ttk.Button(self, text='CREATE', width=7, style="TButton", command=self.createfile).grid(row=3, column=3,
-                                                                                                padx=20, **button_opt)
+        ttk.Button(self, text='SELECT IMAGE', width=20, style="TButton",
+                   command=lambda: self.selectfilename(one)).grid(row=1, column=2, **button_opt)
+        ttk.Button(self, text='SELECT FILES', width=20, style="TButton",
+                   command=lambda: self.selectfilenames(many)).grid(row=2, column=2, **button_opt)
+        ttk.Button(self, text='CREATE', width=20, style="TButton",
+                   command=lambda: self.createfile(one, many)).grid(row=3, column=1, columnspan=2, padx=20, pady=10)
+        ttk.Button(self, text='SELECT IMAGE', width=20, style="TButton",
+                   command=lambda: self.selectfilename(one)).grid(row=5, column=2, **button_opt)
+        ttk.Button(self, text='EXTRACT', width=20, style="TButton",
+                   command=lambda: self.extractfiles(one2)).grid(row=6, column=1, columnspan=2, padx=20, pady=10)
 
         # define options for opening or saving a file
         self.file_opt = options = {}
@@ -45,46 +67,69 @@ class TkGui(tk.Frame):
         options['filetypes'] = [('img file', '*.jpg'), ('all files', '.*')]
         options['parent'] = root
 
-    def openbasefilename(self):
+    def selectfilenames(self, entry):
 
-        """Returns an opened file in read mode.
+        """
+        Returns an opened file in read mode.
         This time the dialog just returns a filename and the file is opened by your own code.
         """
 
         self.file_opt['title'] = "Open file"
+        self.file_opt['multiple'] = True
         # get filename
-        filename = tkinter.filedialog.askopenfilename(**self.file_opt)
+        filenames = tkinter.filedialog.askopenfilename(**self.file_opt)
 
-        # open file on your own
-        if filename:
-            print(filename)
+        if filenames:
+            entry.insert(0, filenames)
 
-    def createfile(self):
+    def selectfilename(self, entry):
 
-        """Returns an opened file in write mode.
+        """
+        Returns an opened file in read mode.
         This time the dialog just returns a filename and the file is opened by your own code.
         """
 
+        self.file_opt['title'] = "Open file"
+        self.file_opt['multiple'] = False
         # get filename
-        self.file_opt['title'] = "Save file as"
-        self.file_opt['filetypes'] = [('img file', '*.jpg'), ('all files', '.*')]
-        filename = tkinter.filedialog.asksaveasfilename(**self.file_opt)
+        filename = tkinter.filedialog.askopenfilename(**self.file_opt)
 
-        # open file on your own
         if filename:
-            print(filename)
+            entry.insert(0, filename)
+
+    def createfile(self, source, files):
+
+        """
+        Returns an opened file in write mode.
+        This time the dialog just returns a filename and the file is opened by your own code.
+        """
+
+        if source and files:
+            addfiles(source, files)
+
+    def extractfiles(self, source):
+
+        """
+        Returns an opened file in write mode.
+        This time the dialog just returns a filename and the file is opened by your own code.
+        """
+
+        if source:
+            removefiles(source)
+
 
 MAGIC_NUMBER = -6
 LENGTH = -10
 
 
 def checkiffiles(args):
-    """Return string of files that are not files.
-        Cant read, write or access them.
+    """
+    Return string of files that are not files.
+    Cant read, write or access them.
 
-            :param args: files to check
-            :returns: string of bad files separated by space
-        """
+        :param args: files to check
+        :returns: string of bad files separated by space
+    """
 
     broken = ""
     for file in args:
@@ -98,7 +143,9 @@ def checkiffiles(args):
 
 
 def usage():
-    """Prints usage to stderr"""
+    """
+    Prints usage to stderr
+    """
 
     print("IMGMANIP\n"
           "Simple tool that's cuts stereoscopic img in half and \"hides\" additional files in it.\n"
@@ -111,13 +158,27 @@ def usage():
 
 
 def cutimg(img):
-    box = (0, 0, img.width/2, img.height)
+    """
+    Splits image in half.
+
+        :param img: img to cut
+        :returns: cropped img
+    """
+
+    box = (0, 0, img.width / 2, img.height)
     cropped = img.crop(box)
     return cropped
 
 
-# :hidden:FILES:NAMELENGTH:NAME:FILELENGTH:FILECONTENT:...:STARTPOSS:31337
 def addfiles(img, files):
+    """
+    Appends files to image
+
+        :format: :hidden:FILES:(NAMELENGTH:NAME:FILELENGTH:FILECONTENT:)...:STARTPOSS:31337
+        :param img: source img to hide the data in
+        :param files: list of filenames to hide in img
+    """
+
     to = open(img, "ab+")
     ending = to.tell()
     to.write(b":hidden:")
@@ -139,8 +200,12 @@ def addfiles(img, files):
     to.close()
 
 
-# :hidden:FILES:NAMELENGTH:NAME:FILELENGTH:FILECONTENT:...:STARTPOSS:31337
 def removefiles(img):
+    """
+    Gets files from img.
+
+        :param img: source img to the get files from
+    """
     source = open(img, "rb+")
     source.seek(MAGIC_NUMBER, 2)
     if source.read(6) != b":31337":
@@ -188,12 +253,14 @@ def mainfunc(mode):
         exit(1)
     if mode == "c":
         new = cutimg(im)
-        new.save("{0}.secret.jpg".format(ntpath.basename(source)))
+        source = "{0}.secret.jpg".format(ntpath.basename(source))
+        new.save(source)
         addfiles(source, files)
     elif mode == "d":
         removefiles(source)
     else:
         raise SystemError("{0} is not valid mode.".format(mode))
+
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
