@@ -131,7 +131,7 @@ class TkGui(tk.Frame):
             test.seek(MAGIC_NUMBER, 2)
             if test.read(6) == b":31337":
                 test.close()
-                print("Does not contain magic number", file=sys.stderr)
+                print("Already contains magic number", file=sys.stderr)
                 exit(1)
             test.close()
             try:
@@ -293,6 +293,13 @@ def mainfunc(mode):
         print("File {0} is not and valid img".format(source), file=sys.stderr)
         exit(1)
     if mode == "c":
+        test = open(source, 'rb+')
+        test.seek(MAGIC_NUMBER, 2)
+        if test.read(6) == b":31337":
+            test.close()
+            print("Already contains magic number", file=sys.stderr)
+            exit(1)
+        test.close()
         new = cutimg(im)
         source = "{0}.secret.jpg".format(ntpath.basename(source))
         new.save(source)
