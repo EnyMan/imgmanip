@@ -127,6 +127,13 @@ class TkGui(tk.Frame):
         """
 
         if source and files:
+            test = open(source, 'rb+')
+            test.seek(MAGIC_NUMBER, 2)
+            if test.read(6) == b":31337":
+                test.close()
+                print("Does not contain magic number", file=sys.stderr)
+                exit(1)
+            test.close()
             try:
                 im = Image.open(source)
             except IOError:
@@ -212,6 +219,7 @@ def addfiles(img, files):
 
     to = open(img, "ab+")
     ending = to.tell()
+    to.seek(0, 2)
     to.write(b":hidden:")
     to.write(struct.pack("l", len(files)))
     to.write(b":")
@@ -240,13 +248,15 @@ def removefiles(img):
     source = open(img, "rb+")
     source.seek(MAGIC_NUMBER, 2)
     if source.read(6) != b":31337":
-        print("some error", file=sys.stderr)
+        source.close()
+        print("Does not contain magic number", file=sys.stderr)
         exit(1)
     source.seek(LENGTH, 2)
     start = struct.unpack("l", source.read(4))[0]
     source.seek(start, 0)
     if source.read(8) != b":hidden:":
-        print("some error", file=sys.stderr)
+        source.close()
+        print("Not file created by this app", file=sys.stderr)
         exit(1)
     files = struct.unpack("l", source.read(4))[0]
     for i in range(files):
