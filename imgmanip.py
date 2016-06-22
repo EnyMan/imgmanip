@@ -51,15 +51,16 @@ class TkGui(tk.Frame):
 
         # define buttons
         ttk.Button(self, text='SELECT IMAGE', width=20, style="TButton",
-                   command=lambda: self.selectfilename(one)).grid(row=1, column=2, **button_opt)
+                   command=lambda: self.selectsourcefilename(one)).grid(row=1, column=2, **button_opt)
         ttk.Button(self, text='SELECT FILES', width=20, style="TButton",
                    command=lambda: self.selectfilenames(many)).grid(row=2, column=2, **button_opt)
         ttk.Button(self, text='CREATE', width=20, style="TButton",
-                   command=lambda: self.createfile(one, many)).grid(row=3, column=1, columnspan=2, padx=20, pady=10)
+                   command=lambda: self.createfile(one.get(), many.get()))\
+            .grid(row=3, column=1, columnspan=2, padx=20, pady=10)
         ttk.Button(self, text='SELECT IMAGE', width=20, style="TButton",
-                   command=lambda: self.selectfilename(one)).grid(row=5, column=2, **button_opt)
+                   command=lambda: self.selectdestfilename(one2)).grid(row=5, column=2, **button_opt)
         ttk.Button(self, text='EXTRACT', width=20, style="TButton",
-                   command=lambda: self.extractfiles(one2)).grid(row=6, column=1, columnspan=2, padx=20, pady=10)
+                   command=lambda: self.extractfiles(one2.get())).grid(row=6, column=1, columnspan=2, padx=20, pady=10)
 
         # define options for opening or saving a file
         self.file_opt = options = {}
@@ -76,13 +77,15 @@ class TkGui(tk.Frame):
 
         self.file_opt['title'] = "Open file"
         self.file_opt['multiple'] = True
+
         # get filename
         filenames = tkinter.filedialog.askopenfilename(**self.file_opt)
 
         if filenames:
+            entry.delete(0, len(entry.get())+1)
             entry.insert(0, filenames)
 
-    def selectfilename(self, entry):
+    def selectsourcefilename(self, entry):
 
         """
         Returns an opened file in read mode.
@@ -91,10 +94,29 @@ class TkGui(tk.Frame):
 
         self.file_opt['title'] = "Open file"
         self.file_opt['multiple'] = False
+
         # get filename
         filename = tkinter.filedialog.askopenfilename(**self.file_opt)
 
         if filename:
+            entry.delete(0, len(entry.get())+1)
+            entry.insert(0, filename)
+
+    def selectdestfilename(self, entry):
+
+        """
+        Returns an opened file in read mode.
+        This time the dialog just returns a filename and the file is opened by your own code.
+        """
+
+        self.file_opt['title'] = "Open file"
+        self.file_opt['multiple'] = False
+
+        # get filename
+        filename = tkinter.filedialog.askopenfilename(**self.file_opt)
+
+        if filename:
+            entry.delete(0, len(entry.get())+1)
             entry.insert(0, filename)
 
     def createfile(self, source, files):
@@ -105,6 +127,15 @@ class TkGui(tk.Frame):
         """
 
         if source and files:
+            try:
+                im = Image.open(source)
+            except IOError:
+                print("File {0} is not and valid img".format(source), file=sys.stderr)
+                exit(1)
+            files = list(self.tk.splitlist(files))
+            new = cutimg(im)
+            source = "{0}.secret.jpg".format(source)
+            new.save(source)
             addfiles(source, files)
 
     def extractfiles(self, source):
