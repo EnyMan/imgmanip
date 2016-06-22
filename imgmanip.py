@@ -171,7 +171,8 @@ def removefiles(img):
 
 
 def mainfunc(mode):
-    """"Main function of the program
+    """"
+    Main function of the program
 
         :param mode: chooses if hide 'c' or unhide 'd'
         :type mode: string
@@ -206,6 +207,10 @@ if __name__ == '__main__':
             base.geometry("400x200")
             TkGui(base).grid()
             base.mainloop()
+        elif sys.argv[1].find("-") != -1:
+            print("Unknown argument! {0}".format(sys.argv[1]), file=sys.stderr)
+            usage()
+            exit(1)
         else:
             notfiles = checkiffiles(sys.argv[1:])
             if notfiles != "":
