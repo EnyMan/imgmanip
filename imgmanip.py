@@ -36,31 +36,31 @@ class TkGui(tk.Frame):
         # options for buttons
         button_opt = {'pady': 0}
 
-        # define labels
+        # define Entries
         one = ttk.Entry(self, width=40, style="TEntry")
-        one.insert(0, "Select File")
-        one.grid(row=1, column=1, pady=10, padx=7)
+        one.insert(0, "Select File To Insert to")
+        one.grid(row=0, column=0, pady=10, padx=7)
 
         many = ttk.Entry(self, width=40, style="TEntry")
-        many.insert(0, "Select Files")
-        many.grid(row=2, column=1, pady=0, padx=7)
+        many.insert(0, "Select Files to be inserted")
+        many.grid(row=1, column=0, pady=0, padx=7)
 
         one2 = ttk.Entry(self, width=40, style="TEntry")
-        one2.insert(0, "Select File")
-        one2.grid(row=5, column=1, pady=0, padx=7)
+        one2.insert(0, "Select File To Extract from")
+        one2.grid(row=4, column=0, pady=0, padx=7)
 
         # define buttons
         ttk.Button(self, text='SELECT IMAGE', width=20, style="TButton",
-                   command=lambda: self.selectsourcefilename(one)).grid(row=1, column=2, **button_opt)
+                   command=lambda: self.selectsourcefilename(one)).grid(row=0, column=1, **button_opt)
         ttk.Button(self, text='SELECT FILES', width=20, style="TButton",
-                   command=lambda: self.selectfilenames(many)).grid(row=2, column=2, **button_opt)
+                   command=lambda: self.selectfilenames(many)).grid(row=1, column=1, **button_opt)
         ttk.Button(self, text='CREATE', width=20, style="TButton",
                    command=lambda: self.createfile(one.get(), many.get()))\
-            .grid(row=3, column=1, columnspan=2, padx=20, pady=10)
+            .grid(row=2, column=0, columnspan=2, padx=20, pady=10)
         ttk.Button(self, text='SELECT IMAGE', width=20, style="TButton",
-                   command=lambda: self.selectdestfilename(one2)).grid(row=5, column=2, **button_opt)
+                   command=lambda: self.selectdestfilename(one2)).grid(row=4, column=1, **button_opt)
         ttk.Button(self, text='EXTRACT', width=20, style="TButton",
-                   command=lambda: self.extractfiles(one2.get())).grid(row=6, column=1, columnspan=2, padx=20, pady=10)
+                   command=lambda: self.extractfiles(one2.get())).grid(row=5, column=0, columnspan=2, padx=20, pady=10)
 
         # define options for opening or saving a file
         self.file_opt = options = {}
@@ -127,6 +127,13 @@ class TkGui(tk.Frame):
         """
 
         if source and files:
+            test = open(source, 'rb+')
+            test.seek(MAGIC_NUMBER, 2)
+            if test.read(6) == b":31337":
+                test.close()
+                print("Already contains magic number", file=sys.stderr)
+                exit(1)
+            test.close()
             try:
                 im = Image.open(source)
             except IOError:
