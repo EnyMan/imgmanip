@@ -110,6 +110,7 @@ class TkGui(tk.Frame):
         wrapper for adding files
         """
 
+        files = list(self.tk.splitlist(files))
         if checkiffiles(files + [source]) == "":
             if source and files:
                 test = open(source, 'rb+')
@@ -124,7 +125,6 @@ class TkGui(tk.Frame):
                 except IOError:
                     print("File {0} is not and valid img".format(source), file=sys.stderr)
                     exit(1)
-                files = list(self.tk.splitlist(files))
                 new = cutimg(im)
                 source = "{0}.secret.jpg".format(source)
                 new.save(source)
@@ -137,7 +137,7 @@ class TkGui(tk.Frame):
         wrapper for removing files
         """
 
-        if checkiffiles(source) == "":
+        if checkiffiles([source]) == "":
             removefiles(source)
 
 
@@ -146,6 +146,7 @@ LENGTH = -10
 
 
 def checkiffiles(args, mode="RW"):
+
     """
     Return string of files that are not files.
     Cant read, write or access them.
@@ -175,6 +176,7 @@ def checkiffiles(args, mode="RW"):
 
 
 def usage():
+
     """
     Prints usage to stderr
     """
@@ -183,13 +185,15 @@ def usage():
           "Simple tool that's cuts stereoscopic img in half and \"hides\" additional files in it.\n"
           "\n"
           "Usage: imgmanip source file...\n"
-          "           creates new file source.secret.jpg where source is the file that is cut in half\n"
+          "           Creates new file source.secret.jpg where source is the file that is cut in half\n"
           "           and files are hidden files in it\n"
+          "           Giving only source takes the source for data extraction\n"
           "       imgmanip -g\n"
           "           launches imgmanip in gui form\n", file=sys.stderr)
 
 
 def cutimg(img):
+
     """
     Splits image in half.
 
@@ -203,6 +207,7 @@ def cutimg(img):
 
 
 def addfiles(img, files):
+
     """
     Appends files to image
 
@@ -234,11 +239,13 @@ def addfiles(img, files):
 
 
 def removefiles(img):
+
     """
     Gets files from img.
 
         :param img: source img to the get files from
     """
+
     source = open(img, "rb+")
     source.seek(MAGIC_NUMBER, 2)
     if source.read(6) != b":31337":
@@ -257,12 +264,12 @@ def removefiles(img):
         source.read(1)
         namelenght = struct.unpack("!l", source.read(4))[0]
         source.read(1)
-        name = str(source.read(namelenght))
+        name = source.read(namelenght).decode("utf-8")
         source.read(1)
         filelenght = struct.unpack("!l", source.read(4))[0]
         source.read(1)
         file = source.read(filelenght)
-        tmp = open(name, "wb+")
+        tmp = open(ntpath.dirname(img) + "/" + name, "wb+")
         tmp.write(file)
         tmp.close()
 
@@ -271,6 +278,7 @@ def removefiles(img):
 
 
 def mainfunc(mode):
+
     """"
     Main function of the program.
     Based on mode decides what to do
