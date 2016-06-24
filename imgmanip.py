@@ -38,7 +38,7 @@ class TkGui(tk.Frame):
 
         # define Entries
         one = ttk.Entry(self, width=40, style="TEntry")
-        one.insert(0, "Select File To Insert to")
+        one.insert(0, "Select Image To Insert to")
         one.grid(row=0, column=0, pady=10, padx=7)
 
         many = ttk.Entry(self, width=40, style="TEntry")
@@ -46,7 +46,7 @@ class TkGui(tk.Frame):
         many.grid(row=1, column=0, pady=0, padx=7)
 
         one2 = ttk.Entry(self, width=40, style="TEntry")
-        one2.insert(0, "Select File To Extract from")
+        one2.insert(0, "Select Image To Extract from")
         one2.grid(row=4, column=0, pady=0, padx=7)
 
         # define buttons
