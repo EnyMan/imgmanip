@@ -127,13 +127,6 @@ class TkGui(tk.Frame):
         """
 
         if source and files:
-            test = open(source, 'rb+')
-            test.seek(MAGIC_NUMBER, 2)
-            if test.read(6) == b":31337":
-                test.close()
-                print("Already contains magic number", file=sys.stderr)
-                exit(1)
-            test.close()
             try:
                 im = Image.open(source)
             except IOError:
