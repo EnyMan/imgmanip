@@ -221,20 +221,20 @@ def addfiles(img, files):
     ending = to.tell()
     to.seek(0, 2)
     to.write(b":hidden:")
-    to.write(struct.pack("l", len(files)))
+    to.write(struct.pack("=l", len(files)))
     to.write(b":")
     for file in files:
         fh = open(file, "rb")
         fh.seek(0, 2)
         size = fh.tell()
         fh.seek(0)
-        to.write(struct.pack("l", len(ntpath.basename(file))))
+        to.write(struct.pack("=l", len(ntpath.basename(file))))
         to.write(b":" + bytes(ntpath.basename(file).encode()) + b":")
-        to.write(struct.pack("l", size) + b":")
+        to.write(struct.pack("=l", size) + b":")
         to.write(fh.read())
         fh.close()
         to.write(b":")
-    to.write(struct.pack("l", ending))
+    to.write(struct.pack("=l", ending))
     to.write(b":31337")
     to.close()
 
@@ -252,20 +252,20 @@ def removefiles(img):
         print("Does not contain magic number", file=sys.stderr)
         exit(1)
     source.seek(LENGTH, 2)
-    start = struct.unpack("l", source.read(4))[0]
+    start = struct.unpack("=l", source.read(4))[0]
     source.seek(start, 0)
     if source.read(8) != b":hidden:":
         source.close()
         print("Not file created by this app", file=sys.stderr)
         exit(1)
-    files = struct.unpack("l", source.read(4))[0]
+    files = struct.unpack("=l", source.read(4))[0]
     for i in range(files):
         a = source.read(1)
-        namelenght = struct.unpack("l", source.read(4))[0]
+        namelenght = struct.unpack("=l", source.read(4))[0]
         a = source.read(1)
         name = source.read(namelenght)
         a = source.read(1)
-        filelenght = struct.unpack("l", source.read(4))[0]
+        filelenght = struct.unpack("=l", source.read(4))[0]
         a = source.read(1)
         file = source.read(filelenght)
         tmp = open(name, "wb+")
