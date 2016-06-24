@@ -126,33 +126,33 @@ class TkGui(tk.Frame):
         This time the dialog just returns a filename and the file is opened by your own code.
         """
 
-        if source and files:
-            test = open(source, 'rb+')
-            test.seek(MAGIC_NUMBER, 2)
-            if test.read(6) == b":31337":
+        if checkiffiles(files + [source]) == "":
+            if source and files:
+                test = open(source, 'rb+')
+                test.seek(MAGIC_NUMBER, 2)
+                if test.read(6) == b":31337":
+                    test.close()
+                    print("Already contains magic number", file=sys.stderr)
+                    exit(1)
                 test.close()
-                print("Already contains magic number", file=sys.stderr)
-                exit(1)
-            test.close()
-            try:
-                im = Image.open(source)
-            except IOError:
-                print("File {0} is not and valid img".format(source), file=sys.stderr)
-                exit(1)
-            files = list(self.tk.splitlist(files))
-            new = cutimg(im)
-            source = "{0}.secret.jpg".format(source)
-            new.save(source)
-            addfiles(source, files)
+                try:
+                    im = Image.open(source)
+                except IOError:
+                    print("File {0} is not and valid img".format(source), file=sys.stderr)
+                    exit(1)
+                files = list(self.tk.splitlist(files))
+                new = cutimg(im)
+                source = "{0}.secret.jpg".format(source)
+                new.save(source)
+                addfiles(source, files)
 
     def extractfiles(self, source):
 
         """
-        Returns an opened file in write mode.
-        This time the dialog just returns a filename and the file is opened by your own code.
+        wrapper for removing files
         """
 
-        if source:
+        if checkiffiles(source) == "":
             removefiles(source)
 
 
@@ -160,22 +160,31 @@ MAGIC_NUMBER = -6
 LENGTH = -10
 
 
-def checkiffiles(args):
+def checkiffiles(args, mode="RW"):
     """
     Return string of files that are not files.
     Cant read, write or access them.
 
+        :param mode: string with perms to check W|R|WR
         :param args: files to check
         :returns: string of bad files separated by space
     """
 
     broken = ""
     for file in args:
-        if not os.path.exists(file) and not os.access(file, os.R_OK):
-            if broken == "":
-                broken += file
-            else:
-                broken += " " + file
+        for perm in mode:
+            if perm == "R":
+                if not os.path.exists(file) and not os.access(file, os.R_OK):
+                    if broken == "":
+                        broken += file
+                    else:
+                        broken += " " + file
+            if perm == "W":
+                if not os.path.exists(file) and not os.access(file, os.W_OK):
+                    if broken == "":
+                        broken += file
+                    else:
+                        broken += " " + file
 
     return broken
 
@@ -278,7 +287,8 @@ def removefiles(img):
 
 def mainfunc(mode):
     """"
-    Main function of the program
+    Main function of the program.
+    Based on mode decides what to do
 
         :param mode: chooses if hide 'c' or unhide 'd'
         :type mode: string
