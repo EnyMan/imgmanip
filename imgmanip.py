@@ -117,6 +117,9 @@ class TkGui(tk.Frame):
 
         """
         wrapper for adding files
+
+            :param files: tk string list of files to add
+            :param source: img to add items to
         """
 
         files = list(self.tk.splitlist(files))
@@ -144,6 +147,8 @@ class TkGui(tk.Frame):
 
         """
         wrapper for removing files
+
+            :param source: img to remove files from
         """
 
         if check_if_files([source]) == "":
