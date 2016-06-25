@@ -165,22 +165,21 @@ def check_if_files(args, mode="RW"):
         :param args: files to check
         :returns: string of bad files separated by space
     """
-
+    read = write = True
     broken = ""
     for file in args:
         for perm in mode:
             if perm == "R":
                 if not os.path.exists(file) and not os.access(file, os.R_OK):
-                    if broken == "":
-                        broken += file
-                    else:
-                        broken += " " + file
+                    read = False
             if perm == "W":
                 if not os.path.exists(file) and not os.access(file, os.W_OK):
-                    if broken == "":
-                        broken += file
-                    else:
-                        broken += " " + file
+                    write = False
+        if not read or not write:
+            if broken == "":
+                broken += file
+            else:
+                broken += " " + file
 
     return broken
 
