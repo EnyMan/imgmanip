@@ -27,6 +27,7 @@ Upon extraction the source image is not deleted.
 
 # Future To Do/Issues
 
+1. Need to redo Program help msg
 1. Right now GUI is different on Linux and on Windows (The windows looks correctly)
 2. Errors are not displayed in GUI
 3. Need to polish the GUI more
