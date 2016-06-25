@@ -9,7 +9,7 @@ Usage: imgmanip source file...
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;imgmanip -g  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Launches imgmanip in gui form 
  
-Created cut image is saved in current working directory.
-Extracted images are also created in current working directory.
-While working from GUI the cut file is saved in the same directory as the original was and extracted files in the same directory as source the source image was.
+Created cut image is saved in current working directory.  
+Extracted images are also created in current working directory.  
+While working from GUI the cut file is saved in the same directory as the original was and extracted files in the same directory as source the source image was.  
 Upon extraction the source image is not deleted.
