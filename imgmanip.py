@@ -11,7 +11,6 @@ a schovat do něj další obrázek a textový soubor nebo wav soubor
 """
 
 from PIL import Image
-import ntpath
 import struct
 import sys
 import os
@@ -234,8 +233,8 @@ def add_files(img, files):
         fh.seek(0, 2)
         size = fh.tell()
         fh.seek(0)
-        to.write(struct.pack("!l", len(bytes(ntpath.basename(file).encode("utf-8")))))
-        to.write(b":" + bytes(ntpath.basename(file).encode("utf-8")) + b":")
+        to.write(struct.pack("!l", len(bytes(os.path.basename(file).encode("utf-8")))))
+        to.write(b":" + bytes(os.path.basename(file).encode("utf-8")) + b":")
         to.write(struct.pack("!l", size) + b":")
         to.write(fh.read())
         fh.close()
@@ -276,7 +275,7 @@ def remove_files(img):
         filelenght = struct.unpack("!l", source.read(4))[0]
         source.read(1)
         file = source.read(filelenght)
-        tmp = open(ntpath.dirname(ntpath.abspath(img)) + "/" + name, "wb+")
+        tmp = open(os.path.dirname(os.path.abspath(img)) + "/" + name, "wb+")
         tmp.write(file)
         tmp.close()
 
@@ -311,7 +310,7 @@ def main_func(mode):
             exit(1)
         test.close()
         new = cut_img(im)
-        source = "{0}.secret.jpg".format(ntpath.basename(source))
+        source = "{0}.secret.jpg".format(os.path.basename(source))
         new.save(source)
         add_files(source, files)
     elif mode == "d":
