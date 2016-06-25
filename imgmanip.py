@@ -16,13 +16,18 @@ import tkinter.constants
 import tkinter.filedialog
 import tkinter.font
 
+MAGIC_NUMBER = -6
+LENGTH = -10
+
 
 class TkGui(tk.Frame):
+    
     """"
     GUI init class
     """
 
     def __init__(self, root):
+        
         """"
         Init method
 
@@ -51,16 +56,16 @@ class TkGui(tk.Frame):
 
         # define buttons
         ttk.Button(self, text='SELECT IMAGE', width=20, style="TButton",
-                   command=lambda: self.selectfilename(one)).grid(row=0, column=1, **button_opt)
+                   command=lambda: self.select_filename(one)).grid(row=0, column=1, **button_opt)
         ttk.Button(self, text='SELECT FILES', width=20, style="TButton",
-                   command=lambda: self.selectfilenames(many)).grid(row=1, column=1, **button_opt)
+                   command=lambda: self.select_filenames(many)).grid(row=1, column=1, **button_opt)
         ttk.Button(self, text='CREATE', width=20, style="TButton",
-                   command=lambda: self.createfile(one.get(), many.get()))\
+                   command=lambda: self.create_file(one.get(), many.get()))\
             .grid(row=2, column=0, columnspan=2, padx=20, pady=10)
         ttk.Button(self, text='SELECT IMAGE', width=20, style="TButton",
-                   command=lambda: self.selectfilename(one2)).grid(row=4, column=1, **button_opt)
+                   command=lambda: self.select_filename(one2)).grid(row=4, column=1, **button_opt)
         ttk.Button(self, text='EXTRACT', width=20, style="TButton",
-                   command=lambda: self.extractfiles(one2.get())).grid(row=5, column=0, columnspan=2, padx=20, pady=10)
+                   command=lambda: self.extract_files(one2.get())).grid(row=5, column=0, columnspan=2, padx=20, pady=10)
 
         # define options for opening or saving a file
         self.file_opt = options = {}
@@ -68,7 +73,7 @@ class TkGui(tk.Frame):
         options['filetypes'] = [('img file', '*.jpg'), ('all files', '.*')]
         options['parent'] = root
 
-    def selectfilenames(self, entry):
+    def select_filenames(self, entry):
 
         """
         Opens dialog for choosing multiple files.
@@ -86,7 +91,7 @@ class TkGui(tk.Frame):
             entry.delete(0, len(entry.get())+1)
             entry.insert(0, filenames)
 
-    def selectfilename(self, entry):
+    def select_filename(self, entry):
 
         """
         Opens dialog for choosing one file.
@@ -104,14 +109,14 @@ class TkGui(tk.Frame):
             entry.delete(0, len(entry.get())+1)
             entry.insert(0, filename)
 
-    def createfile(self, source, files):
+    def create_file(self, source, files):
 
         """
         wrapper for adding files
         """
 
         files = list(self.tk.splitlist(files))
-        if checkiffiles(files + [source]) == "":
+        if check_if_files(files + [source]) == "":
             if source and files:
                 test = open(source, 'rb+')
                 test.seek(MAGIC_NUMBER, 2)
@@ -125,27 +130,23 @@ class TkGui(tk.Frame):
                 except IOError:
                     print("File {0} is not and valid img".format(source), file=sys.stderr)
                     exit(1)
-                new = cutimg(im)
+                new = cut_img(im)
                 source = "{0}.secret.jpg".format(source)
                 new.save(source)
-                addfiles(source, files)
+                add_files(source, files)
 
     @staticmethod
-    def extractfiles(source):
+    def extract_files(source):
 
         """
         wrapper for removing files
         """
 
-        if checkiffiles([source]) == "":
-            removefiles(source)
+        if check_if_files([source]) == "":
+            remove_files(source)
 
 
-MAGIC_NUMBER = -6
-LENGTH = -10
-
-
-def checkiffiles(args, mode="RW"):
+def check_if_files(args, mode="RW"):
 
     """
     Return string of files that are not files.
@@ -192,7 +193,7 @@ def usage():
           "           launches imgmanip in gui form\n", file=sys.stderr)
 
 
-def cutimg(img):
+def cut_img(img):
 
     """
     Splits image in half.
@@ -206,7 +207,7 @@ def cutimg(img):
     return cropped
 
 
-def addfiles(img, files):
+def add_files(img, files):
 
     """
     Appends files to image
@@ -238,7 +239,7 @@ def addfiles(img, files):
     to.close()
 
 
-def removefiles(img):
+def remove_files(img):
 
     """
     Gets files from img.
@@ -277,7 +278,7 @@ def removefiles(img):
     source.truncate(start)
 
 
-def mainfunc(mode):
+def main_func(mode):
 
     """"
     Main function of the program.
@@ -303,12 +304,12 @@ def mainfunc(mode):
             print("Already contains magic number", file=sys.stderr)
             exit(1)
         test.close()
-        new = cutimg(im)
+        new = cut_img(im)
         source = "{0}.secret.jpg".format(ntpath.basename(source))
         new.save(source)
-        addfiles(source, files)
+        add_files(source, files)
     elif mode == "d":
-        removefiles(source)
+        remove_files(source)
     else:
         raise SystemError("{0} is not valid mode.".format(mode))
 
@@ -330,15 +331,15 @@ if __name__ == '__main__':
             usage()
             exit(1)
         else:
-            notfiles = checkiffiles(sys.argv[1:])
+            notfiles = check_if_files(sys.argv[1:])
             if notfiles != "":
                 print("Files {0} are not accessible files!".format(notfiles), file=sys.stderr)
                 exit(1)
             else:
                 sys.argv.pop(0)
-                mainfunc('d')
+                main_func('d')
     else:
-        notfiles = checkiffiles(sys.argv[1:])
+        notfiles = check_if_files(sys.argv[1:])
         if notfiles != "":
             print("Files {0} are not accessible files!".format(notfiles), file=sys.stderr)
             exit(1)
@@ -346,4 +347,4 @@ if __name__ == '__main__':
             print("Directory {0} not writable!".format(os.getcwd()), file=sys.stderr)
             exit(1)
         sys.argv.pop(0)
-        mainfunc('c')
+        main_func('c')
