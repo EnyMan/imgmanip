@@ -276,7 +276,7 @@ def remove_files(img):
         filelenght = struct.unpack("!l", source.read(4))[0]
         source.read(1)
         file = source.read(filelenght)
-        tmp = open(ntpath.dirname(img) + "/" + name, "wb+")
+        tmp = open(ntpath.dirname(ntpath.abspath(img)) + "/" + name, "wb+")
         tmp.write(file)
         tmp.close()
 
