@@ -207,7 +207,7 @@ def cut_img(img):
         :returns: cropped img
     """
 
-    box = (0, 0, img.width / 2, img.height)
+    box = (0, 0, img.width // 2, img.height)
     cropped = img.crop(box)
     return cropped
 
