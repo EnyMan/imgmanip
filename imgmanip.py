@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""Semestrální práce k předmětu BI-PYT,
+"""
+:name: Imgmanip
+:author: Martin Piták
+:version: 1.0
+Semestrální práce k předmětu BI-PYT,
 jejížm ukolem bylo rozpůlit obrázek v pulce
-a schovat do něj další obrázek a textový soubor nebo wav soubor"""
+a schovat do něj další obrázek a textový soubor nebo wav soubor
+"""
 
 from PIL import Image
 import ntpath
@@ -21,14 +26,14 @@ LENGTH = -10
 
 
 class TkGui(tk.Frame):
-    
-    """"
+
+    """
     GUI init class
     """
 
     def __init__(self, root):
         
-        """"
+        """
         Init method
 
             :param root: Tkinter root file
@@ -188,7 +193,8 @@ def usage():
           "Usage: imgmanip source file...\n"
           "           Creates new file source.secret.jpg where source is the file that is cut in half\n"
           "           and files are hidden files in it\n"
-          "           Giving only source takes the source for data extraction\n"
+          "       imgmanip source\n"
+          "           Extracts data from source\n"
           "       imgmanip -g\n"
           "           launches imgmanip in gui form\n", file=sys.stderr)
 
@@ -228,8 +234,8 @@ def add_files(img, files):
         fh.seek(0, 2)
         size = fh.tell()
         fh.seek(0)
-        to.write(struct.pack("!l", len(ntpath.basename(file))))
-        to.write(b":" + bytes(ntpath.basename(file).encode()) + b":")
+        to.write(struct.pack("!l", len(bytes(ntpath.basename(file).encode("utf-8")))))
+        to.write(b":" + bytes(ntpath.basename(file).encode("utf-8")) + b":")
         to.write(struct.pack("!l", size) + b":")
         to.write(fh.read())
         fh.close()
@@ -280,7 +286,7 @@ def remove_files(img):
 
 def main_func(mode):
 
-    """"
+    """
     Main function of the program.
     Based on mode decides what to do
 
